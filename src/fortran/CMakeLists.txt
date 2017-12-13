@@ -1,0 +1,5 @@
+add_executable(darcy_multicompartment_fortran darcy_multicompartment.F90)
+
+target_link_libraries(darcy_multicompartment_fortran PRIVATE opencmisslibs)
+
+install(TARGETS darcy_multicompartment_fortran DESTINATION bin)
