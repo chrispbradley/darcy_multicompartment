@@ -1,4 +1,4 @@
-PROGRAM DARCYSTATICEXAMPLE
+PROGRAM darcy_multicompartment
 
   !PROGRAM LIBRARIES
 
@@ -217,27 +217,6 @@ PROGRAM DARCYSTATICEXAMPLE
   !================================================================================================================================
   !
 
-  !Set diagnostics
-
-  DIAG_LEVEL_LIST(1)=1
-  DIAG_LEVEL_LIST(2)=2
-  DIAG_LEVEL_LIST(3)=3
-  DIAG_LEVEL_LIST(4)=4
-  DIAG_LEVEL_LIST(5)=5
-
-  DIAG_ROUTINE_LIST(1)="DARCY_EQUATION_FINITE_ELEMENT_CALCULATE"
-
-  !CMFE_ALL_DIAG_TYPE/CMFE_IN_DIAG_TYPE/CMFE_FROM_DIAG_TYPE
-!   CALL cmfe_DiagnosticsSetOn(CMFE_IN_DIAG_TYPE,DIAG_LEVEL_LIST,"DarcyDiagnostics",DIAG_ROUTINE_LIST,Err)
-
-  !CMFE_ALL_TIMING_TYPE/CMFE_IN_TIMING_TYPE/CMFE_FROM_TIMING_TYPE
-  !TIMING_ROUTINE_LIST(1)="PROBLEM_FINITE_ELEMENT_CALCULATE"
-  !CALL TIMING_SET_ON(IN_TIMING_TYPE,.TRUE.,"",TIMING_ROUTINE_LIST,ERR,ERROR,*999)
-
-  !
-  !================================================================================================================================
-  !
-
   !COORDINATE SYSTEM
 
   !Start the creation of a new RC coordinate system
@@ -257,6 +236,7 @@ PROGRAM DARCYSTATICEXAMPLE
   !Start the creation of a new region
   CALL cmfe_Region_Initialise(Region,Err)
   CALL cmfe_Region_CreateStart(RegionUserNumber,WorldRegion,Region,Err)
+  CALL cmfe_Region_LabelSet(Region,"DarcyRegion",Err)
   !Set the regions coordinate system as defined above
   CALL cmfe_Region_CoordinateSystemSet(Region,CoordinateSystem,Err)
   !Finish the creation of the region
@@ -286,6 +266,7 @@ PROGRAM DARCYSTATICEXAMPLE
     CALL cmfe_Basis_QuadratureNumberOfGaussXiSet(BasisGeometry,[BASIS_XI_GAUSS_GEOMETRY,BASIS_XI_GAUSS_GEOMETRY, &
       & BASIS_XI_GAUSS_GEOMETRY],Err)
   ENDIF
+  CALL cmfe_Basis_QuadratureLocalFaceGaussEvaluateSet(BasisGeometry,.true.,Err)
   !Finish the creation of the basis
   CALL cmfe_Basis_CreateFinish(BasisGeometry,Err)
   !
@@ -312,6 +293,7 @@ PROGRAM DARCYSTATICEXAMPLE
       CALL cmfe_Basis_QuadratureNumberOfGaussXiSet(BasisVelocity,[BASIS_XI_GAUSS_VELOCITY,BASIS_XI_GAUSS_VELOCITY, &
         & BASIS_XI_GAUSS_VELOCITY],Err)
     ENDIF
+    CALL cmfe_Basis_QuadratureLocalFaceGaussEvaluateSet(BasisVelocity,.true.,Err)
     !Finish the creation of the basis
     CALL cmfe_Basis_CreateFinish(BasisVelocity,Err)
   ENDIF
@@ -341,6 +323,7 @@ PROGRAM DARCYSTATICEXAMPLE
       CALL cmfe_Basis_QuadratureNumberOfGaussXiSet(BasisPressure,[BASIS_XI_GAUSS_PRESSURE,BASIS_XI_GAUSS_PRESSURE, &
         & BASIS_XI_GAUSS_PRESSURE],Err)
     ENDIF
+    CALL cmfe_Basis_QuadratureLocalFaceGaussEvaluateSet(BasisPressure,.true.,Err)
     !Finish the creation of the basis
     CALL cmfe_Basis_CreateFinish(BasisPressure,Err)
   ENDIF
@@ -414,6 +397,9 @@ PROGRAM DARCYSTATICEXAMPLE
 !  ENDDO
   CALL cmfe_Field_ParameterSetUpdateStart(GeometricField,CMFE_FIELD_U_VARIABLE_TYPE,CMFE_FIELD_VALUES_SET_TYPE,Err)
   CALL cmfe_Field_ParameterSetUpdateFinish(GeometricField,CMFE_FIELD_U_VARIABLE_TYPE,CMFE_FIELD_VALUES_SET_TYPE,Err)
+
+  !Update the geometric field parameters
+  CALL cmfe_GeneratedMesh_GeometricParametersCalculate(GeneratedMesh,GeometricField,Err)
 
   !
   !================================================================================================================================
@@ -735,11 +721,6 @@ PROGRAM DARCYSTATICEXAMPLE
   !================================================================================================================================
   !
 
-  !RUN SOLVERS
-
-  !Turn off PETSc error handling
-  !CALL PETSC_ERRORHANDLING_SET_ON(ERR,ERROR,*999)
-
   !Solve the problem
   WRITE(*,'(A)') "Solving problem..."
   CALL cmfe_Problem_Solve(Problem,Err)
@@ -756,8 +737,8 @@ PROGRAM DARCYSTATICEXAMPLE
     WRITE(*,'(A)') "Exporting fields..."
     CALL cmfe_Fields_Initialise(Fields,Err)
     CALL cmfe_Fields_Create(Region,Fields,Err)
-    CALL cmfe_Fields_NodesExport(Fields,"StaticDarcy","FORTRAN",Err)
-    CALL cmfe_Fields_ElementsExport(Fields,"StaticDarcy","FORTRAN",Err)
+    CALL cmfe_Fields_NodesExport(Fields,"darcy_multi","FORTRAN",Err)
+    CALL cmfe_Fields_ElementsExport(Fields,"darcy_multi","FORTRAN",Err)
     CALL cmfe_Fields_Finalise(Fields,Err)
     WRITE(*,'(A)') "Field exported!"
   ENDIF
@@ -773,4 +754,4 @@ PROGRAM DARCYSTATICEXAMPLE
   WRITE(*,'(A)') "Program successfully completed."
   STOP
 
-END PROGRAM DARCYSTATICEXAMPLE
+END PROGRAM darcy_multicompartment
