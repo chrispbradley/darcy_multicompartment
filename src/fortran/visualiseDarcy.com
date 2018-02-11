@@ -1,5 +1,7 @@
-gfx read node "./darcy_multi.part0.exnode";
-gfx read element "./darcy_multi.part0.exelem";
+gfx read node "./output/STATIC_SOLUTION.part0.exnode";
+gfx read element "./output/STATIC_SOLUTION.part0.exelem";
+
+gfx def faces
 
 gfx define field Coordinate.x component Coordinate.x
 gfx define field Coordinate.y component Coordinate.y
@@ -15,4 +17,3 @@ gfx modify g_element DarcyRegion node_points data z_velocity
 
 gfx edit scene
 gfx create window 1;
-gfx def faces
